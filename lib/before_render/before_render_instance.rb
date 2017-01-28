@@ -1,19 +1,16 @@
-module Rails3BeforeRender
+module RailsBeforeRender
   module BeforeRenderInstance
     extend ActiveSupport::Concern
 
-    included do
-      alias_method_chain :render, :before_render_filter
-      define_callbacks :render
+    def self.prepended(base)
+      base.class_eval { define_callbacks :render }
     end
 
-    def render_with_before_render_filter *opts, &blk
-      run_callbacks :render do
-        render_without_before_render_filter(*opts, &blk)
-      end
+    def render(*opts, &blk)
+      run_callbacks(:render) { super }
     end
 
   end
 end
 
-ActionController::Base.send :include,  Rails3BeforeRender::BeforeRenderInstance
+ActionController::Base.prepend RailsBeforeRender::BeforeRenderInstance
